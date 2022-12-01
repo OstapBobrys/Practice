@@ -122,4 +122,23 @@ describe("GoodShop", function () {
         const supply = await erc20.totalSupply()
         expect(supply).to.eq("50")
     })
+
+    it("allow to burn", async function() {
+        const tokenAmount = 3
+        const txData = {
+            value: tokenAmount,
+            to: shop.address,
+            gasLimit: 2100000,
+            gasPrice: 8000000000
+        }
+        const tx = await buyer.sendTransaction(txData)
+        await tx.wait()
+        expect(await erc20.balanceOf(buyer.address)).to.eq(tokenAmount)
+        const approval = await erc20.connect(buyer).approve(buyer.address, tokenAmount)
+        await approval.wait()
+
+        const burn = await erc20.connect(owner).burn(buyer.address, tokenAmount)
+        await burn.wait()
+        expect( await erc20.balanceOf(buyer.address)).to.eq(0)
+    })
 })
